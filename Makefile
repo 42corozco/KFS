@@ -1,14 +1,14 @@
 src = kernel.c \
 	  boot.S \
 
-iso = kfs.iso
-bin = kernel
-cfg = grub.cfg
-
-build_dir ?= build
+build_dir = build
 iso_path := iso
 boot_path := ${iso_path}/boot
 grub_path := ${boot_path}/grub
+
+iso = kfs.iso
+bin = ${build_dir}/kernel
+cfg = grub.cfg
 
 CC := gcc
 CFLAGS := -fno-stack-protector \
@@ -36,29 +36,34 @@ all: build link iso
 
 .PHONY: build
 build: ${objs}
+	@printf "\033[0;36m0bject file created\033[m\n"
 
 ${build_dir}/%.o: %.S
-	@mkdir -pv ${build_dir}
+	@mkdir -p ${build_dir}
 	${AS} ${ASFLAGS} $< -o $@
 
 ${build_dir}/%.o: %.c
-	@mkdir -pv ${build_dir}
+	@mkdir -p ${build_dir}
 	${CC} ${CFLAGS} -c $< -o $@
 
 .PHONY: link
 link: ${ldfile} ${objs}
 	${LD} ${LDFLAGS} ${objs} -o ${bin}
+	@printf "\033[0;34mLinking completed\033[m\n"
+
 
 .PHONY: iso
 iso: ${bin}
-	@mkdir -pv ${grub_path}
-	cp ${bin} ${boot_path}
-	cp ${cfg} ${grub_path}
-	${MKRESCUE} -o ${iso} ${iso_path}
+	@mkdir -p ${grub_path}
+	@cp ${bin} ${boot_path}
+	@cp ${cfg} ${grub_path}
+	@${MKRESCUE} -o ${iso} ${iso_path}
+	@printf "\033[0;32mIso file created\033[m\n"
+
 
 .PHONY: clean
 clean:
-	@/bin/rm -rf ${build_dir} ${iso}
+	@/bin/rm -rf ${build_dir}
 
 .PHONY: fclean
 fclean: clean
