@@ -1,89 +1,72 @@
-#color
-COM_COLOR   = \033[0;34m
-OBJ_COLOR   = \033[0;36m
-OK_COLOR    = \033[0;32m
-ERROR_COLOR = \033[0;31m
-WARN_COLOR  = \033[0;33m
-NO_COLOR    = \033[m
+src = kernel.c \
+	  boot.S \
 
-OK_STRING    = "[OK]"
-ERROR_STRING = "[ERROR]"
-WARN_STRING  = "[WARNING]"
-COM_STRING   = "Compiling"
+iso = kfs.iso
+bin = kernel
+cfg = grub.cfg
 
-define run_and_test
-printf "%b" "$(COM_COLOR)$(COM_STRING) $(OBJ_COLOR)$(@F)$(NO_COLOR)\r"; \
-$(1) 2> $@.log; \
-RESULT=$$?; \
-if [ $$RESULT -ne 0 ]; then \
-  printf "%-60b%b" "$(COM_COLOR)$(COM_STRING)$(OBJ_COLOR) $@" "$(ERROR_COLOR)$(ERROR_STRING)$(NO_COLOR)\n"   ; \
-elif [ -s $@.log ]; then \
-  printf "%-60b%b" "$(COM_COLOR)$(COM_STRING)$(OBJ_COLOR) $@" "$(WARN_COLOR)$(WARN_STRING)$(NO_COLOR)\n"   ; \
-else  \
-  printf "%-60b%b" "$(COM_COLOR)$(COM_STRING)$(OBJ_COLOR) $(@F)" "$(OK_COLOR)$(OK_STRING)$(NO_COLOR)\n"   ; \
-fi; \
-cat $@.log; \
-rm -f $@.log; \
-exit $$RESULT
-endef
+build_dir ?= build
+iso_path := iso
+boot_path := ${iso_path}/boot
+grub_path := ${boot_path}/grub
 
-# ---------------------------------------------------------
-
-CP := cp
-RM := rm -rf
-MKDIR := @mkdir -p
-
-ISO = KFS.iso
-BIN = kernel
-CFG = grub.cfg
-# ---------------------------------------------------------
-
-#PATH
-ISO_PATH := iso
-BOOT_PATH := $(ISO_PATH)/boot
-GRUB_PATH := $(BOOT_PATH)/grub
-# ---------------------------------------------------------
-
-#GCC
 CC := gcc
-CCFLAGS = -fno-stack-protector -fno-builtin -fno-exceptions -nostdlib -nodefaultlibs -m32 -c
+CFLAGS := -fno-stack-protector \
+ -fno-builtin \
+ -fno-exceptions \
+ -nostdlib \
+ -nodefaultlibs \
+ -m32 \
 
-#LD
-LDFLAGS = -m elf_i386 -T
+LD := ld
+ldfile := linker.ld
+LDFLAGS := -m elf_i386 -T ${ldfile}
 
-#NAMS
-NAMSFLAGS = -f elf32
-# ---------------------------------------------------------
+AS := nasm
+ASFLAGS := -f elf32
 
-all: fclean bootloader kernel linker iso
-	@printf "%b" "$(ERROR_COLOR)\tMake has completed\t$(OK_COLOR)[SUCCESS]$(NO_COLOR)\n";
+MKRESCUE := grub-mkrescue
 
-bootloader: boot.asm
-	@$(call run_and_test,nasm $(NAMSFLAGS) boot.asm -o boot.o)
+objs := $(addprefix ${build_dir}/, ${src})
+objs := ${objs:.c=.o}
+objs := ${objs:.S=.o}
 
-kernel: kernel.c
-	@$(call run_and_test,$(CC) $(CCFLAGS) kernel.c -o kernel.o)
+.PHONY: all
+all: build link iso
 
-linker: linker.ld boot.o kernel.o
-	@$(call run_and_test,ld $(LDFLAGS) linker.ld -o kernel boot.o kernel.o)
+.PHONY: build
+build: ${objs}
 
-iso: kernel
-	@$(MKDIR) $(GRUB_PATH)
-	@$(CP) $(BIN) $(BOOT_PATH)
-	@$(CP) $(CFG) $(GRUB_PATH)
-	@grub-file --is-x86-multiboot $(BOOT_PATH)/$(BIN)
-	@grub-mkrescue --compress=xz -o $(ISO) $(ISO_PATH)
+${build_dir}/%.o: %.S
+	@mkdir -pv ${build_dir}
+	${AS} ${ASFLAGS} $< -o $@
 
+${build_dir}/%.o: %.c
+	@mkdir -pv ${build_dir}
+	${CC} ${CFLAGS} -c $< -o $@
+
+.PHONY: link
+link: ${ldfile} ${objs}
+	${LD} ${LDFLAGS} ${objs} -o ${bin}
+
+.PHONY: iso
+iso: ${bin}
+	@mkdir -pv ${grub_path}
+	cp ${bin} ${boot_path}
+	cp ${cfg} ${grub_path}
+	${MKRESCUE} -o ${iso} ${iso_path}
+
+.PHONY: clean
 clean:
-	@$(RM) *.o $(BIN) $(ISO_PATH)
-	@printf "%b" "$(ERROR_COLOR)\tmake clean\t$(OK_COLOR)[SUCCESS]$(NO_COLOR)\n";
+	@/bin/rm -rf ${build_dir} ${iso}
 
+.PHONY: fclean
 fclean: clean
-	@$(RM) $(ISO)
+	@/bin/rm -rf ${iso} ${iso_path}
 
+.PHONY: re
 re: fclean all
 
-run:
-	qemu-system-i386 -s -cdrom $(ISO)
-
-.PHONY: all bootloader kernel linker iso clean fclean re run
+.PHONY: run
+run: all
+	qemu-system-i386 -s -cdrom ${iso}
