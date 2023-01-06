@@ -2,9 +2,7 @@
 
 ## Definition
 Le fichier grub.cfg est un fichier de configuration utilisé par GRUB, un chargeur de démarrage multiplateforme, pour démarrer le système.
-  
 
-  
 ----
 
 ## Déroulement
@@ -16,7 +14,6 @@ Le fichier grub.cfg est un fichier de configuration utilisé par GRUB, un charge
 * `multiboot /boot/kernel:` Charge un fichier noyau de système d'exploitation en mémoire et le démarre
 
 -----
-
 
 ## Exemple
 
