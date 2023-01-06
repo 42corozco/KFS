@@ -1,14 +1,34 @@
-## Introduction:
+# Kernel From Scratch pt1
 
-[Glossaire][1]  
+This project is an introduction to kernel development and the first part of a series to develop a functional kernel.
 
-## Procédure pas à pas:
+## What we learned
 
-* [Boot][2]  
-* [Grub][3]  
-* [Linker][4]  
+We wrote a little article summarizing what we learned during the development of this project. Click [here](/docs/kfs.md) if you are interested !
 
-[1]: /docs/GLOSSAIRE.md
-[2]: /docs/walkthrough_boot.md
-[3]: /docs/walkthrough_grub.md
-[4]: /docs/walkthrough_linker.md
+## Getting Started
+
+### Prerequisites
+
+To run this project locally, you must have installed:
+
+* truc1
+* truc2
+
+### Installation
+
+1. Clone this repository
+
+```sh
+git clone https://github.com/42corozco/KFS.git
+```
+2. Build the ISO
+```sh
+cd KFS
+make 
+```
+
+3. Run it with qemu
+```sh
+make run
+```

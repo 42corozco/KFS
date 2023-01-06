@@ -47,13 +47,13 @@ ${build_dir}/%.o: %.c
 	${CC} ${CFLAGS} -c $< -o $@
 
 .PHONY: link
-link: ${ldfile} ${objs}
+link: build ${ldfile}
 	${LD} ${LDFLAGS} ${objs} -o ${bin}
 	@printf "\033[0;34mLinking completed\033[m\n"
 
 
 .PHONY: iso
-iso: ${bin}
+iso: link ${bin}
 	@mkdir -p ${grub_path}
 	@cp ${bin} ${boot_path}
 	@cp ${cfg} ${grub_path}
@@ -73,5 +73,5 @@ fclean: clean
 re: fclean all
 
 .PHONY: run
-run: all
+run: iso ${iso}
 	qemu-system-i386 -s -cdrom ${iso}
