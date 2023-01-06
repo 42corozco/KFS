@@ -13,3 +13,8 @@
 * Bootloader loads Operating System to RAM and leave execution to OS
 The BIOS attempts to look for a bootable device.
 After the button is pressed on the power supply, it provides electricity to main components like the CPU and the motherboard. 
+
+## Resources
+
+https://arjunsreedharan.org/post/82710718100/kernels-101-lets-write-a-kernel
+
