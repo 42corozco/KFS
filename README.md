@@ -12,8 +12,12 @@ We wrote a little article summarizing what we learned during the development of 
 
 To run this project locally, you must have installed:
 
-* truc1
-* truc2
+* binutils
+* nasm
+* gcc
+* grub-common
+* make
+* xorriso
 
 ### Installation
 
@@ -32,3 +36,6 @@ make
 ```sh
 make run
 ```
+
+### Cross-Compiler for [École 42][42]
+[42]: /docs/Cross-Compiler.md

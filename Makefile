@@ -1,4 +1,4 @@
-src = kernel.c \
+src = kernel.S \
 	  boot.S \
 
 build_dir = build
