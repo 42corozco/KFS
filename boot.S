@@ -11,10 +11,9 @@ section .multiboot_header
 
 section .text
 global start
-extern main			;defined in kernel.c
+extern main
 
 start:
-	cli			;block interrupts
 	mov esp, stack_space	;set stack pointer
 	call main
 	hlt			;halt the CPU

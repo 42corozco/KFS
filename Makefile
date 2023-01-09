@@ -10,14 +10,6 @@ iso = kfs.iso
 bin = ${build_dir}/kernel
 cfg = grub.cfg
 
-CC := gcc
-CFLAGS := -fno-stack-protector \
- -fno-builtin \
- -fno-exceptions \
- -nostdlib \
- -nodefaultlibs \
- -m32 \
-
 LD := ld
 ldfile := linker.ld
 LDFLAGS := -m elf_i386 -T ${ldfile}
@@ -40,10 +32,6 @@ build: ${objs}
 ${build_dir}/%.o: %.S
 	@mkdir -p ${build_dir}
 	${AS} ${ASFLAGS} $< -o $@
-
-${build_dir}/%.o: %.c
-	@mkdir -p ${build_dir}
-	${CC} ${CFLAGS} -c $< -o $@
 
 .PHONY: link
 link: build ${ldfile}
