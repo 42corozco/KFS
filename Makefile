@@ -27,9 +27,8 @@ ASFLAGS := -f elf32
 
 MKRESCUE := grub-mkrescue
 
-objs := $(addprefix ${build_dir}/, ${src})
-objs := ${objs:.c=.o}
-objs := ${objs:.S=.o}
+objs := $(addprefix ${build_dir}/, ${src:.S=.o})
+
 
 .PHONY: all
 all: build link iso
